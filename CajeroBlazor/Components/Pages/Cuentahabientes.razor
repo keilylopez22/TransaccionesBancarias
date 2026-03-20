@@ -1,0 +1,125 @@
+@page "/cuentahabientes"
+@rendermode InteractiveServer
+@inject CajeroBlazor.Services.ApiService Api
+
+<PageTitle>Cuentahabientes</PageTitle>
+
+<div class="container mt-4">
+    <h2>👤 Cuentahabientes</h2>
+
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-primary text-white">Registrar nuevo cuentahabiente</div>
+        <div class="card-body">
+            <EditForm Model="req" OnValidSubmit="Crear">
+                <DataAnnotationsValidator />
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <label class="form-label">CUI</label>
+                        <InputText class="form-control" @bind-Value="req.CUI" placeholder="Ej: 3012456780101" />
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Primer Nombre</label>
+                        <InputText class="form-control" @bind-Value="req.PrimerNombre" />
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Segundo Nombre</label>
+                        <InputText class="form-control" @bind-Value="req.SegundoNombre" />
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Primer Apellido</label>
+                        <InputText class="form-control" @bind-Value="req.PrimerApellido" />
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Segundo Apellido</label>
+                        <InputText class="form-control" @bind-Value="req.SegundoApellido" />
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Fecha de Nacimiento</label>
+                        <InputDate class="form-control" @bind-Value="req.FechaNacimiento" />
+                    </div>
+                </div>
+                <div class="mt-3">
+                    <button type="submit" class="btn btn-primary" disabled="@cargando">
+                        @(cargando ? "Guardando..." : "Registrar")
+                    </button>
+                </div>
+            </EditForm>
+
+            @if (mensaje != null)
+            {
+                <div class="alert @(esError ? "alert-danger" : "alert-success") mt-3">@mensaje</div>
+            }
+        </div>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-header bg-secondary text-white d-flex justify-content-between align-items-center">
+            <span>Lista de cuentahabientes</span>
+            <button class="btn btn-sm btn-light" @onclick="Cargar">🔄 Actualizar</button>
+        </div>
+        <div class="card-body p-0">
+            @if (lista == null)
+            {
+                <p class="p-3 text-muted">Cargando...</p>
+            }
+            else if (!lista.Any())
+            {
+                <p class="p-3 text-muted">No hay cuentahabientes registrados.</p>
+            }
+            else
+            {
+                <table class="table table-hover mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>ID</th><th>CUI</th><th>Nombre</th><th>Fecha Nacimiento</th><th>Registro</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var c in lista)
+                        {
+                            <tr>
+                                <td>@c.Id</td>
+                                <td>@c.CUI</td>
+                                <td>@c.NombreCompleto</td>
+                                <td>@c.FechaNacimiento.ToString("dd/MM/yyyy")</td>
+                                <td>@c.FechaRegistro.ToString("dd/MM/yyyy")</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
+        </div>
+    </div>
+</div>
+
+@code {
+    private List<CajeroBlazor.Models.Cuentahabiente>? lista;
+    private CajeroBlazor.Models.CrearCuentahabienteRequest req = new();
+    private string? mensaje;
+    private bool esError;
+    private bool cargando;
+
+    protected override async Task OnInitializedAsync() => await Cargar();
+
+    private async Task Cargar() => lista = await Api.GetCuentahabientesAsync();
+
+    private async Task Crear()
+    {
+        cargando = true;
+        mensaje = null;
+        var ok = await Api.CrearCuentahabienteAsync(req);
+        if (ok)
+        {
+            mensaje = "Cuentahabiente registrado exitosamente.";
+            esError = false;
+            req = new();
+            await Cargar();
+        }
+        else
+        {
+            mensaje = "Error al registrar el cuentahabiente.";
+            esError = true;
+        }
+        cargando = false;
+    }
+}

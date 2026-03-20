@@ -1,0 +1,111 @@
+@page "/cuentas"
+@rendermode InteractiveServer
+@inject CajeroBlazor.Services.ApiService Api
+
+<PageTitle>Cuentas</PageTitle>
+
+<div class="container mt-4">
+    <h2>🏦 Cuentas Bancarias</h2>
+
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-success text-white">Abrir nueva cuenta</div>
+        <div class="card-body">
+            <EditForm Model="req" OnValidSubmit="Crear">
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <label class="form-label">ID Cuentahabiente</label>
+                        <InputNumber class="form-control" @bind-Value="req.IdCuentahabiente" />
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Tipo de Cuenta</label>
+                        <InputSelect class="form-select" @bind-Value="req.IdTipoCuenta">
+                            <option value="0">-- Seleccionar --</option>
+                            <option value="1">Ahorro</option>
+                            <option value="2">Monetaria</option>
+                            <option value="3">Empresarial</option>
+                        </InputSelect>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Saldo Inicial (Q)</label>
+                        <InputNumber class="form-control" @bind-Value="req.SaldoInicial" />
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-success mt-3" disabled="@cargando">
+                    @(cargando ? "Creando..." : "Abrir Cuenta")
+                </button>
+            </EditForm>
+
+            @if (respuesta != null)
+            {
+                <div class="alert alert-success mt-3">
+                    ✅ Cuenta creada: <strong>@respuesta.NumeroCuenta</strong> (ID: @respuesta.IdCuenta)
+                </div>
+            }
+            @if (error != null)
+            {
+                <div class="alert alert-danger mt-3">@error</div>
+            }
+        </div>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-header bg-secondary text-white">Consultar cuentas por cuentahabiente</div>
+        <div class="card-body">
+            <div class="input-group mb-3" style="max-width:300px">
+                <InputNumber class="form-control" @bind-Value="idConsulta" placeholder="ID Cuentahabiente" />
+                <button class="btn btn-outline-secondary" @onclick="Consultar">Buscar</button>
+            </div>
+
+            @if (cuentas != null)
+            {
+                @if (!cuentas.Any())
+                {
+                    <p class="text-muted">No se encontraron cuentas.</p>
+                }
+                else
+                {
+                    <table class="table table-hover">
+                        <thead class="table-light">
+                            <tr><th>ID</th><th>Número</th><th>Saldo</th><th>Tipo</th><th>Estado</th><th>Apertura</th></tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var c in cuentas)
+                            {
+                                <tr>
+                                    <td>@c.Id</td>
+                                    <td><code>@c.NumeroCuenta</code></td>
+                                    <td>Q @c.Saldo.ToString("N2")</td>
+                                    <td>@(c.IdTipoCuenta == 1 ? "Ahorro" : c.IdTipoCuenta == 2 ? "Monetaria" : "Empresarial")</td>
+                                    <td><span class="badge @(c.Estado ? "bg-success" : "bg-danger")">@(c.Estado ? "Activa" : "Inactiva")</span></td>
+                                    <td>@c.FechaApertura.ToString("dd/MM/yyyy")</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                }
+            }
+        </div>
+    </div>
+</div>
+
+@code {
+    private CajeroBlazor.Models.CrearCuentaRequest req = new();
+    private CajeroBlazor.Models.CrearCuentaResponse? respuesta;
+    private List<CajeroBlazor.Models.Cuenta>? cuentas;
+    private string? error;
+    private bool cargando;
+    private int idConsulta;
+
+    private async Task Crear()
+    {
+        cargando = true;
+        error = null;
+        respuesta = null;
+        respuesta = await Api.CrearCuentaAsync(req);
+        if (respuesta == null) error = "Error al crear la cuenta. Verifique los datos.";
+        cargando = false;
+    }
+
+    private async Task Consultar() =>
+        cuentas = await Api.GetCuentasPorCuentahabienteAsync(idConsulta);
+}

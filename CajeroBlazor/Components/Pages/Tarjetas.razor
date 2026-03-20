@@ -1,0 +1,72 @@
+@page "/tarjetas"
+@rendermode InteractiveServer
+@inject CajeroBlazor.Services.ApiService Api
+
+<PageTitle>Tarjetas</PageTitle>
+
+<div class="container mt-4">
+    <h2>💳 Emisión de Tarjetas</h2>
+
+    <div class="card shadow-sm" style="max-width:500px">
+        <div class="card-header bg-warning text-dark">Emitir nueva tarjeta</div>
+        <div class="card-body">
+            <EditForm Model="req" OnValidSubmit="Crear">
+                <div class="mb-3">
+                    <label class="form-label">ID Cuentahabiente</label>
+                    <InputNumber class="form-control" @bind-Value="req.IdCuentahabiente" />
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">ID Cuenta</label>
+                    <InputNumber class="form-control" @bind-Value="req.IdCuenta" />
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Tipo de Tarjeta</label>
+                    <InputSelect class="form-select" @bind-Value="req.IdTipoTarjeta">
+                        <option value="0">-- Seleccionar --</option>
+                        <option value="1">Débito</option>
+                        <option value="2">Crédito</option>
+                    </InputSelect>
+                </div>
+                <button type="submit" class="btn btn-warning" disabled="@cargando">
+                    @(cargando ? "Emitiendo..." : "Emitir Tarjeta")
+                </button>
+            </EditForm>
+        </div>
+    </div>
+
+    @if (respuesta != null)
+    {
+        <div class="card mt-4 border-success shadow" style="max-width:500px">
+            <div class="card-header bg-success text-white">✅ Tarjeta emitida exitosamente</div>
+            <div class="card-body">
+                <table class="table table-borderless mb-0">
+                    <tr><th>Número:</th><td><code>@respuesta.NumeroTarjeta</code></td></tr>
+                    <tr><th>PIN:</th><td><strong>@respuesta.PIN_Generado</strong> <small class="text-danger">(guárdelo)</small></td></tr>
+                    <tr><th>CVV:</th><td>@respuesta.CVV</td></tr>
+                    <tr><th>Vence:</th><td>@respuesta.Vence.ToString("MM/yyyy")</td></tr>
+                </table>
+            </div>
+        </div>
+    }
+    @if (error != null)
+    {
+        <div class="alert alert-danger mt-3" style="max-width:500px">@error</div>
+    }
+</div>
+
+@code {
+    private CajeroBlazor.Models.CrearTarjetaRequest req = new();
+    private CajeroBlazor.Models.CrearTarjetaResponse? respuesta;
+    private string? error;
+    private bool cargando;
+
+    private async Task Crear()
+    {
+        cargando = true;
+        error = null;
+        respuesta = null;
+        respuesta = await Api.CrearTarjetaAsync(req);
+        if (respuesta == null) error = "Error al emitir la tarjeta. Verifique los datos.";
+        cargando = false;
+    }
+}

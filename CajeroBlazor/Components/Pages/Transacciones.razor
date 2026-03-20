@@ -1,0 +1,153 @@
+@page "/transacciones"
+@rendermode InteractiveServer
+@inject CajeroBlazor.Services.ApiService Api
+
+<PageTitle>Transacciones</PageTitle>
+
+<div class="container mt-4">
+    <h2>💸 Transacciones</h2>
+
+    <ul class="nav nav-tabs mb-4">
+        <li class="nav-item">
+            <button class="nav-link @(tab == 1 ? "active" : "")" @onclick="() => CambiarTab(1)">💰 Depósito</button>
+        </li>
+        <li class="nav-item">
+            <button class="nav-link @(tab == 2 ? "active" : "")" @onclick="() => CambiarTab(2)">➕ Nota de Crédito</button>
+        </li>
+        <li class="nav-item">
+            <button class="nav-link @(tab == 3 ? "active" : "")" @onclick="() => CambiarTab(3)">🏧 Retiro (Nota Débito)</button>
+        </li>
+    </ul>
+
+    @if (tab == 1)
+    {
+        <div class="card shadow-sm" style="max-width:450px">
+            <div class="card-header bg-primary text-white">Depósito en efectivo</div>
+            <div class="card-body">
+                <EditForm Model="deposito" OnValidSubmit="HacerDeposito">
+                    <div class="mb-3">
+                        <label class="form-label">Número de Cuenta</label>
+                        <InputText class="form-control" @bind-Value="deposito.NumeroCuenta" placeholder="Ej: 1000000001" />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Monto (Q)</label>
+                        <InputNumber class="form-control" @bind-Value="deposito.Monto" />
+                    </div>
+                    <button type="submit" class="btn btn-primary" disabled="@cargando">
+                        @(cargando ? "Procesando..." : "Depositar")
+                    </button>
+                </EditForm>
+            </div>
+        </div>
+    }
+
+    @if (tab == 2)
+    {
+        <div class="card shadow-sm" style="max-width:450px">
+            <div class="card-header bg-success text-white">Nota de Crédito</div>
+            <div class="card-body">
+                <EditForm Model="credito" OnValidSubmit="HacerCredito">
+                    <div class="mb-3">
+                        <label class="form-label">Número de Cuenta</label>
+                        <InputText class="form-control" @bind-Value="credito.NumeroCuenta" />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Monto (Q)</label>
+                        <InputNumber class="form-control" @bind-Value="credito.Monto" />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Detalle</label>
+                        <InputText class="form-control" @bind-Value="credito.Detalle" placeholder="Motivo del crédito" />
+                    </div>
+                    <button type="submit" class="btn btn-success" disabled="@cargando">
+                        @(cargando ? "Procesando..." : "Aplicar Crédito")
+                    </button>
+                </EditForm>
+            </div>
+        </div>
+    }
+
+    @if (tab == 3)
+    {
+        <div class="card shadow-sm" style="max-width:450px">
+            <div class="card-header bg-danger text-white">Retiro con Tarjeta</div>
+            <div class="card-body">
+                <EditForm Model="debito" OnValidSubmit="HacerDebito">
+                    <div class="mb-3">
+                        <label class="form-label">Número de Tarjeta</label>
+                        <InputText class="form-control" @bind-Value="debito.NumeroTarjeta" placeholder="Ej: BCRD2403MO0025123479" />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">PIN</label>
+                        <InputText class="form-control" type="password" @bind-Value="debito.PIN" maxlength="4" />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Monto a retirar (Q)</label>
+                        <InputNumber class="form-control" @bind-Value="debito.Monto" />
+                    </div>
+                    <button type="submit" class="btn btn-danger" disabled="@cargando">
+                        @(cargando ? "Procesando..." : "Retirar")
+                    </button>
+                </EditForm>
+            </div>
+        </div>
+    }
+
+    @if (resultado != null)
+    {
+        <div class="alert alert-success mt-4" style="max-width:450px">
+            <strong>✅ @resultado.Mensaje</strong>
+            @if (resultado.NuevoSaldo.HasValue)
+            {
+                <div>Nuevo saldo: <strong>Q @resultado.NuevoSaldo.Value.ToString("N2")</strong></div>
+            }
+            @if (resultado.MontoAplicado.HasValue)
+            {
+                <div>Monto: Q @resultado.MontoAplicado.Value.ToString("N2")</div>
+            }
+        </div>
+    }
+    @if (errorMsg != null)
+    {
+        <div class="alert alert-danger mt-4" style="max-width:450px">❌ @errorMsg</div>
+    }
+</div>
+
+@code {
+    private int tab = 1;
+    private CajeroBlazor.Models.DepositoRequest deposito = new();
+    private CajeroBlazor.Models.NotaCreditoRequest credito = new();
+    private CajeroBlazor.Models.NotaDebitoRequest debito = new();
+    private CajeroBlazor.Models.TransaccionResponse? resultado;
+    private string? errorMsg;
+    private bool cargando;
+
+    private void CambiarTab(int t) { tab = t; resultado = null; errorMsg = null; }
+
+    private async Task HacerDeposito()
+    {
+        cargando = true; resultado = null; errorMsg = null;
+        var (data, err) = await Api.DepositoAsync(deposito);
+        resultado = data; errorMsg = err;
+        if (data != null) deposito = new();
+        cargando = false;
+    }
+
+    private async Task HacerCredito()
+    {
+        cargando = true; resultado = null; errorMsg = null;
+        var (data, err) = await Api.NotaCreditoAsync(credito);
+        resultado = data; errorMsg = err;
+        if (data != null) credito = new();
+        cargando = false;
+    }
+
+    private async Task HacerDebito()
+    {
+        cargando = true; resultado = null; errorMsg = null;
+        var (data, err) = await Api.NotaDebitoAsync(debito);
+        resultado = data; errorMsg = err;
+        if (data != null) debito = new();
+        cargando = false;
+    }
+}
