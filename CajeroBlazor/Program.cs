@@ -8,10 +8,7 @@ builder.Services.AddRazorComponents()
 
 builder.Services.AddHttpClient<ApiService>(client =>
 {
-    client.BaseAddress = new Uri("https://localhost:7011/");
-}).ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler
-{
-    ServerCertificateCustomValidationCallback = HttpClientHandler.DangerousAcceptAnyServerCertificateValidator
+    client.BaseAddress = new Uri("http://localhost:5123/");
 });
 
 var app = builder.Build();

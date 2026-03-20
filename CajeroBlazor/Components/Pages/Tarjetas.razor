@@ -5,60 +5,215 @@
 <PageTitle>Tarjetas</PageTitle>
 
 <div class="container mt-4">
-    <h2>💳 Emisión de Tarjetas</h2>
+    <h2>💳 Tarjetas</h2>
 
-    <div class="card shadow-sm" style="max-width:500px">
-        <div class="card-header bg-warning text-dark">Emitir nueva tarjeta</div>
-        <div class="card-body">
-            <EditForm Model="req" OnValidSubmit="Crear">
-                <div class="mb-3">
-                    <label class="form-label">ID Cuentahabiente</label>
-                    <InputNumber class="form-control" @bind-Value="req.IdCuentahabiente" />
-                </div>
-                <div class="mb-3">
-                    <label class="form-label">ID Cuenta</label>
-                    <InputNumber class="form-control" @bind-Value="req.IdCuenta" />
-                </div>
-                <div class="mb-3">
-                    <label class="form-label">Tipo de Tarjeta</label>
-                    <InputSelect class="form-select" @bind-Value="req.IdTipoTarjeta">
-                        <option value="0">-- Seleccionar --</option>
-                        <option value="1">Débito</option>
-                        <option value="2">Crédito</option>
-                    </InputSelect>
-                </div>
-                <button type="submit" class="btn btn-warning" disabled="@cargando">
-                    @(cargando ? "Emitiendo..." : "Emitir Tarjeta")
-                </button>
-            </EditForm>
-        </div>
-    </div>
+    <ul class="nav nav-tabs mb-4">
+        <li class="nav-item">
+            <button class="nav-link @(tab == 1 ? "active" : "")" @onclick="() => CambiarTab(1)">📋 Listado</button>
+        </li>
+        <li class="nav-item">
+            <button class="nav-link @(tab == 2 ? "active" : "")" @onclick="() => CambiarTab(2)">➕ Emitir Tarjeta</button>
+        </li>
+    </ul>
 
-    @if (respuesta != null)
+    @if (tab == 1)
     {
-        <div class="card mt-4 border-success shadow" style="max-width:500px">
-            <div class="card-header bg-success text-white">✅ Tarjeta emitida exitosamente</div>
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-secondary text-white">Filtrar tarjetas</div>
             <div class="card-body">
-                <table class="table table-borderless mb-0">
-                    <tr><th>Número:</th><td><code>@respuesta.NumeroTarjeta</code></td></tr>
-                    <tr><th>PIN:</th><td><strong>@respuesta.PIN_Generado</strong> <small class="text-danger">(guárdelo)</small></td></tr>
-                    <tr><th>CVV:</th><td>@respuesta.CVV</td></tr>
-                    <tr><th>Vence:</th><td>@respuesta.Vence.ToString("MM/yyyy")</td></tr>
-                </table>
+                <div class="row g-2 align-items-end">
+                    <div class="col-md-3">
+                        <label class="form-label">ID Cuenta (opcional)</label>
+                        <InputNumber class="form-control" @bind-Value="idCuentaFiltro" />
+                    </div>
+                    <div class="col-md-2">
+                        <button class="btn btn-primary w-100" @onclick="CargarTarjetas">🔍 Buscar</button>
+                    </div>
+                    <div class="col-md-2">
+                        <button class="btn btn-outline-secondary w-100" @onclick="LimpiarFiltro">✖ Limpiar</button>
+                    </div>
+                </div>
             </div>
         </div>
+
+        @if (mensajeGlobal != null)
+        {
+            <div class="alert @(esErrorGlobal ? "alert-danger" : "alert-success") alert-dismissible mb-3">
+                @mensajeGlobal
+                <button type="button" class="btn-close" @onclick="() => mensajeGlobal = null"></button>
+            </div>
+        }
+
+        @if (tarjetas == null)
+        {
+            <p class="text-muted">Haz clic en Buscar para cargar las tarjetas.</p>
+        }
+        else if (!tarjetas.Any())
+        {
+            <div class="alert alert-info">No se encontraron tarjetas.</div>
+        }
+        else
+        {
+            <div class="row g-3">
+                @foreach (var t in tarjetas)
+                {
+                    <div class="col-md-6 col-lg-4">
+                        <div class="card h-100 shadow-sm border-@(t.Estado ? "success" : "danger")">
+                            <div class="card-header d-flex justify-content-between align-items-center bg-dark text-white">
+                                <span>@(t.TipoTarjeta ?? "Tarjeta")</span>
+                                <span class="badge @(t.Estado ? "bg-success" : "bg-danger")">
+                                    @(t.Estado ? "✅ Activa" : "🔒 Bloqueada")
+                                </span>
+                            </div>
+                            <div class="card-body">
+                                <div class="mb-2">
+                                    <small class="text-muted">Número</small>
+                                    <div class="fw-bold font-monospace">@FormatarTarjeta(t.NumeroTarjeta)</div>
+                                </div>
+                                <div class="mb-2">
+                                    <small class="text-muted">Titular</small>
+                                    <div>@t.NombreEnTarjeta</div>
+                                </div>
+                                <div class="row mb-2">
+                                    <div class="col-6">
+                                        <small class="text-muted">Vence</small>
+                                        <div>@t.FechaExpiracion.ToString("MM/yyyy")</div>
+                                    </div>
+                                    <div class="col-6">
+                                        <small class="text-muted">Cuenta</small>
+                                        <div><code>@t.NumeroCuenta</code></div>
+                                    </div>
+                                </div>
+
+                                @if (!t.Estado && t.FechaBloqueo.HasValue)
+                                {
+                                    <div class="alert alert-danger py-1 px-2 mb-2 small">
+                                        🔒 Bloqueada el @t.FechaBloqueo.Value.ToString("dd/MM/yyyy HH:mm")
+                                    </div>
+                                }
+                                @if (t.IntentosFallidos > 0)
+                                {
+                                    <div class="alert alert-warning py-1 px-2 mb-2 small">
+                                        ⚠️ Intentos fallidos: <strong>@t.IntentosFallidos</strong>
+                                    </div>
+                                }
+
+                                @if (!t.Estado || t.IntentosFallidos > 0)
+                                {
+                                    <button class="btn btn-sm btn-success w-100 mt-1"
+                                            @onclick="() => Desbloquear(t)"
+                                            disabled="@(desbloqueando == t.Id)">
+                                        @(desbloqueando == t.Id ? "Desbloqueando..." : "🔓 Desbloquear Tarjeta")
+                                    </button>
+                                }
+                            </div>
+                            <div class="card-footer text-muted small">
+                                Emitida: @t.FechaEmision.ToString("dd/MM/yyyy")
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+            <p class="text-muted mt-3 small">Total: @tarjetas.Count tarjeta(s)</p>
+        }
     }
-    @if (error != null)
+
+    @if (tab == 2)
     {
-        <div class="alert alert-danger mt-3" style="max-width:500px">@error</div>
+        <div class="card shadow-sm" style="max-width:500px">
+            <div class="card-header bg-warning text-dark">Emitir nueva tarjeta</div>
+            <div class="card-body">
+                <EditForm Model="req" OnValidSubmit="Crear">
+                    <div class="mb-3">
+                        <label class="form-label">ID Cuentahabiente</label>
+                        <InputNumber class="form-control" @bind-Value="req.IdCuentahabiente" />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">ID Cuenta</label>
+                        <InputNumber class="form-control" @bind-Value="req.IdCuenta" />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Tipo de Tarjeta</label>
+                        <InputSelect class="form-select" @bind-Value="req.IdTipoTarjeta">
+                            <option value="0">-- Seleccionar --</option>
+                            <option value="1">Débito</option>
+                            <option value="2">Crédito</option>
+                        </InputSelect>
+                    </div>
+                    <button type="submit" class="btn btn-warning" disabled="@cargando">
+                        @(cargando ? "Emitiendo..." : "Emitir Tarjeta")
+                    </button>
+                </EditForm>
+            </div>
+        </div>
+
+        @if (respuesta != null)
+        {
+            <div class="card mt-4 border-success shadow" style="max-width:500px">
+                <div class="card-header bg-success text-white">✅ Tarjeta emitida exitosamente</div>
+                <div class="card-body">
+                    <table class="table table-borderless mb-0">
+                        <tr><th>Número:</th><td><code>@respuesta.NumeroTarjeta</code></td></tr>
+                        <tr><th>PIN:</th><td><strong>@respuesta.PIN_Generado</strong> <small class="text-danger">(guárdelo)</small></td></tr>
+                        <tr><th>CVV:</th><td>@respuesta.CVV</td></tr>
+                        <tr><th>Vence:</th><td>@respuesta.Vence.ToString("MM/yyyy")</td></tr>
+                    </table>
+                </div>
+            </div>
+        }
+        @if (error != null)
+        {
+            <div class="alert alert-danger mt-3" style="max-width:500px">@error</div>
+        }
     }
 </div>
 
 @code {
+    private int tab = 1;
+    private int? idCuentaFiltro;
+    private List<CajeroBlazor.Models.Tarjeta>? tarjetas;
     private CajeroBlazor.Models.CrearTarjetaRequest req = new();
     private CajeroBlazor.Models.CrearTarjetaResponse? respuesta;
     private string? error;
+    private string? mensajeGlobal;
+    private bool esErrorGlobal;
     private bool cargando;
+    private int desbloqueando;
+
+    protected override async Task OnInitializedAsync() => await CargarTarjetas();
+
+    private void CambiarTab(int t) { tab = t; mensajeGlobal = null; error = null; respuesta = null; }
+
+    private async Task CargarTarjetas()
+        => tarjetas = await Api.GetTarjetasAsync(idCuentaFiltro > 0 ? idCuentaFiltro : null);
+
+    private async Task LimpiarFiltro()
+    {
+        idCuentaFiltro = null;
+        await CargarTarjetas();
+    }
+
+    private async Task Desbloquear(CajeroBlazor.Models.Tarjeta tarjeta)
+    {
+        desbloqueando = tarjeta.Id;
+        mensajeGlobal = null;
+
+        var (msg, err) = await Api.DesbloquearTarjetaAsync(tarjeta.Id);
+
+        if (msg != null)
+        {
+            mensajeGlobal = $"✅ {msg} — Tarjeta: {tarjeta.NumeroTarjeta}";
+            esErrorGlobal = false;
+            await CargarTarjetas();
+        }
+        else
+        {
+            mensajeGlobal = $"❌ {err}";
+            esErrorGlobal = true;
+        }
+
+        desbloqueando = 0;
+    }
 
     private async Task Crear()
     {
@@ -67,6 +222,13 @@
         respuesta = null;
         respuesta = await Api.CrearTarjetaAsync(req);
         if (respuesta == null) error = "Error al emitir la tarjeta. Verifique los datos.";
+        else { req = new(); tab = 1; await CargarTarjetas(); }
         cargando = false;
+    }
+
+    private static string FormatarTarjeta(string numero)
+    {
+        if (numero.Length <= 4) return numero;
+        return "**** **** " + numero[^4..];
     }
 }

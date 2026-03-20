@@ -12,10 +12,13 @@
             <button class="nav-link @(tab == 1 ? "active" : "")" @onclick="() => CambiarTab(1)">💰 Depósito</button>
         </li>
         <li class="nav-item">
-            <button class="nav-link @(tab == 2 ? "active" : "")" @onclick="() => CambiarTab(2)">➕ Nota de Crédito</button>
+            <button class="nav-link @(tab == 2 ? "active" : "")" @onclick="() => CambiarTab(2)">🧾 Pago de Cheque</button>
         </li>
         <li class="nav-item">
-            <button class="nav-link @(tab == 3 ? "active" : "")" @onclick="() => CambiarTab(3)">🏧 Retiro (Nota Débito)</button>
+            <button class="nav-link @(tab == 3 ? "active" : "")" @onclick="() => CambiarTab(3)">➕ Nota de Crédito</button>
+        </li>
+        <li class="nav-item">
+            <button class="nav-link @(tab == 4 ? "active" : "")" @onclick="() => CambiarTab(4)">🏧 Retiro (Nota Débito)</button>
         </li>
     </ul>
 
@@ -44,6 +47,36 @@
     @if (tab == 2)
     {
         <div class="card shadow-sm" style="max-width:450px">
+            <div class="card-header bg-warning text-dark">Pago de Cheque</div>
+            <div class="card-body">
+                <EditForm Model="cheque" OnValidSubmit="HacerPagoCheque">
+                    <div class="mb-3">
+                        <label class="form-label">Número de Cuenta</label>
+                        <InputText class="form-control" @bind-Value="cheque.NumeroCuenta" placeholder="Ej: 1000000001" />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Número de Cheque</label>
+                        <InputText class="form-control" @bind-Value="cheque.NumeroCheque" placeholder="Ej: CHQ-000123" />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Monto (Q)</label>
+                        <InputNumber class="form-control" @bind-Value="cheque.Monto" />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Fecha del Cheque</label>
+                        <InputDate class="form-control" @bind-Value="cheque.FechaCheque" />
+                    </div>
+                    <button type="submit" class="btn btn-warning" disabled="@cargando">
+                        @(cargando ? "Procesando..." : "Pagar Cheque")
+                    </button>
+                </EditForm>
+            </div>
+        </div>
+    }
+
+    @if (tab == 3)
+    {
+        <div class="card shadow-sm" style="max-width:450px">
             <div class="card-header bg-success text-white">Nota de Crédito</div>
             <div class="card-body">
                 <EditForm Model="credito" OnValidSubmit="HacerCredito">
@@ -67,7 +100,7 @@
         </div>
     }
 
-    @if (tab == 3)
+    @if (tab == 4)
     {
         <div class="card shadow-sm" style="max-width:450px">
             <div class="card-header bg-danger text-white">Retiro con Tarjeta</div>
@@ -116,6 +149,7 @@
 @code {
     private int tab = 1;
     private CajeroBlazor.Models.DepositoRequest deposito = new();
+    private CajeroBlazor.Models.PagoChequeRequest cheque = new();
     private CajeroBlazor.Models.NotaCreditoRequest credito = new();
     private CajeroBlazor.Models.NotaDebitoRequest debito = new();
     private CajeroBlazor.Models.TransaccionResponse? resultado;
@@ -130,6 +164,15 @@
         var (data, err) = await Api.DepositoAsync(deposito);
         resultado = data; errorMsg = err;
         if (data != null) deposito = new();
+        cargando = false;
+    }
+
+    private async Task HacerPagoCheque()
+    {
+        cargando = true; resultado = null; errorMsg = null;
+        var (data, err) = await Api.PagoChequeAsync(cheque);
+        resultado = data; errorMsg = err;
+        if (data != null) cheque = new();
         cargando = false;
     }
 
