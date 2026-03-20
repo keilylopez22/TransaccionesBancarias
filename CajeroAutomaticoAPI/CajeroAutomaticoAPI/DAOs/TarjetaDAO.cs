@@ -77,11 +77,13 @@ public class TarjetaDAO
     {
         using var conn = new SqlConnection(_connectionString);
         using var cmd  = new SqlCommand("SP_DesbloquearTarjeta", conn) { CommandType = CommandType.StoredProcedure };
-        cmd.Parameters.AddWithValue("@Id", id);
+        cmd.Parameters.AddWithValue("@Id",            id);
+        cmd.Parameters.AddWithValue("@NumeroTarjeta", DBNull.Value);
+        cmd.Parameters.AddWithValue("@Usuario",       DBNull.Value);
         await conn.OpenAsync();
         using var reader = await cmd.ExecuteReaderAsync();
         await reader.ReadAsync();
-        return reader.GetString(0);
+        return reader.GetString(reader.GetOrdinal("Mensaje"));
     }
 
     public async Task<string> EliminarAsync(int id)

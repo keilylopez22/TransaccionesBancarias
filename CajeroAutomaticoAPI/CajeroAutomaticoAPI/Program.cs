@@ -24,6 +24,7 @@ builder.Services.AddScoped<CajeroAutomaticoAPI.Services.CuentahabienteService>()
 builder.Services.AddScoped<CajeroAutomaticoAPI.Services.CuentaService>();
 builder.Services.AddScoped<CajeroAutomaticoAPI.Services.TarjetaService>();
 builder.Services.AddScoped<CajeroAutomaticoAPI.Services.TransaccionService>();
+builder.Services.AddScoped<CajeroAutomaticoAPI.Services.TransaccionMasivaService>();
 builder.Services.AddScoped<CajeroAutomaticoAPI.Services.BitacoraService>();
 
 var app = builder.Build();

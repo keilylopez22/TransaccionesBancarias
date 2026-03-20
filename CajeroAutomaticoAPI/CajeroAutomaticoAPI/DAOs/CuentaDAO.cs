@@ -74,7 +74,7 @@ public class CuentaDAO
         return reader.GetString(0);
     }
 
-    public async Task<string> EliminarAsync(int id)
+   public async Task<string> EliminarAsync(int id)
     {
         using var conn = new SqlConnection(_connectionString);
         using var cmd  = new SqlCommand("SP_EliminarCuenta", conn) { CommandType = CommandType.StoredProcedure };

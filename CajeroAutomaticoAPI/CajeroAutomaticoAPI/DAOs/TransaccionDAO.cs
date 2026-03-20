@@ -18,6 +18,7 @@ public class TransaccionDAO
         using var cmd = new SqlCommand("SP_Deposito", conn) { CommandType = System.Data.CommandType.StoredProcedure };
         cmd.Parameters.AddWithValue("@NumeroCuenta", req.NumeroCuenta);
         cmd.Parameters.AddWithValue("@Monto", req.Monto);
+        cmd.Parameters.AddWithValue("@Usuario", "Sistema");
         await conn.OpenAsync();
         using var reader = await cmd.ExecuteReaderAsync();
         await reader.ReadAsync();

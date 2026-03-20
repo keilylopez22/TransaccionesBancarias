@@ -38,7 +38,5 @@ public class TarjetaController : ControllerBase
     public async Task<IActionResult> Desbloquear(int id)
         => Ok(new { Mensaje = await _service.DesbloquearAsync(id) });
 
-    [HttpDelete("{id}")]
-    public async Task<IActionResult> Delete(int id)
-        => Ok(new { Mensaje = await _service.EliminarAsync(id) });
+    
 }

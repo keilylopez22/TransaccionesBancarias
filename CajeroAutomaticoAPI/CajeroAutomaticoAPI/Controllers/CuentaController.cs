@@ -37,7 +37,5 @@ public class CuentaController : ControllerBase
     public async Task<IActionResult> Update(int id, [FromBody] ActualizarCuentaRequest req)
         => Ok(new { Mensaje = await _service.ActualizarAsync(id, req) });
 
-    [HttpDelete("{id}")]
-    public async Task<IActionResult> Delete(int id)
-        => Ok(new { Mensaje = await _service.EliminarAsync(id) });
+   
 }
