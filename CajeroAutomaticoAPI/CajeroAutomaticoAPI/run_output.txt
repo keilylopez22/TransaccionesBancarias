@@ -1,0 +1,10 @@
+Usando la configuración de inicio de c:\Users\Keilyta\Desktop\u 2026\basededatos\Automatico2\CajeroAutomaticoAPI\CajeroAutomaticoAPI\Properties\launchSettings.json...
+Compilando...
+info: Microsoft.Hosting.Lifetime[14]
+      Now listening on: http://localhost:5123
+info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Development
+info: Microsoft.Hosting.Lifetime[0]
+      Content root path: c:\Users\Keilyta\Desktop\u 2026\basededatos\Automatico2\CajeroAutomaticoAPI\CajeroAutomaticoAPI
