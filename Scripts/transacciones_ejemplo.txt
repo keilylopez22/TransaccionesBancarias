@@ -1,0 +1,27 @@
+# ============================================================
+# Archivo de transacciones masivas - Cajero Automatico
+# Formato por tipo:
+#   Deposito    (1): 1|NUMERO_CUENTA|MONTO
+#   PagoCheque  (2): 2|NUMERO_CUENTA|MONTO|NUM_CHEQUE|FECHA(YYYY-MM-DD)
+#   NotaCredito (3): 3|NUMERO_CUENTA|MONTO|DETALLE
+#   NotaDebito  (4): 4|NUMERO_TARJETA|MONTO|PIN
+# ============================================================
+
+# --- Depositos ---
+1|1000000001|500.00
+1|1000000002|1200.50
+1|1000000003|300.00
+1|1000000004|750.00
+
+# --- Pagos de Cheque ---
+2|1000000001|200.00|CHQ-000101|2026-01-15
+2|1000000002|450.75|CHQ-000102|2026-01-16
+
+# --- Notas de Credito ---
+3|1000000001|100.00|Ajuste por error de cobro
+3|1000000003|250.00|Bonificacion mensual
+3|1000000004|50.00|Devolucion de comision
+
+# --- Notas de Debito (Retiros) ---
+4|BCRD2403MO0025123479|150.00|1234
+4|BCRD2403MO0025123480|200.00|2345
