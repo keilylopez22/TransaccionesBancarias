@@ -1,0 +1,35 @@
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.5.2.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CajeroBlazor", "CajeroBlazor\CajeroBlazor.csproj", "{4250E5AC-4052-59B4-83A3-5C0331CAC2EC}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "CajeroAutomaticoAPI", "CajeroAutomaticoAPI", "{B923FA0D-9433-8A07-E0E1-BD813942082C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CajeroAutomaticoAPI", "CajeroAutomaticoAPI\CajeroAutomaticoAPI\CajeroAutomaticoAPI.csproj", "{390DACBC-70F0-0330-8910-7957EE9842CF}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{4250E5AC-4052-59B4-83A3-5C0331CAC2EC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4250E5AC-4052-59B4-83A3-5C0331CAC2EC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4250E5AC-4052-59B4-83A3-5C0331CAC2EC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4250E5AC-4052-59B4-83A3-5C0331CAC2EC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{390DACBC-70F0-0330-8910-7957EE9842CF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{390DACBC-70F0-0330-8910-7957EE9842CF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{390DACBC-70F0-0330-8910-7957EE9842CF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{390DACBC-70F0-0330-8910-7957EE9842CF}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{390DACBC-70F0-0330-8910-7957EE9842CF} = {B923FA0D-9433-8A07-E0E1-BD813942082C}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {0C4A7327-2921-4688-A377-F978099FC1D1}
+	EndGlobalSection
+EndGlobal
