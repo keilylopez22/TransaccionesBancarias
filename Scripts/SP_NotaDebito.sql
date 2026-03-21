@@ -75,17 +75,14 @@ BEGIN
         
         IF ERROR_NUMBER() <> 50000 AND @IdTarjeta IS NOT NULL
         BEGIN
-             INSERT INTO BitacoraTransacciones (
-                IdCuenta, IdTarjeta, IdTipoTransaccion, Monto, 
-                SaldoAnterior, SaldoNuevo, Usuario, Detalle, Exito, NumeroDocumento
-             )
-             VALUES (
-                @IdCuenta, @IdTarjeta, 5, @Monto, 
-                ISNULL(@SaldoActual,0), ISNULL(@SaldoActual,0), 
-                @UsuarioSistema, 'FALLO: ' + ERROR_MESSAGE(), 0, @NumeroDocumento
-             );
-        END
-        
+             INSERT INTO BitacoraTransacciones (IdCuenta, IdTarjeta, IdTipoTransaccion, Monto, SaldoAnterior, 
+             SaldoNuevo, Usuario, Detalle, Exito, NumeroDocumento
+        )
+        VALUES (@IdCuenta,  @IdTarjeta, 4, @Monto, ISNULL(@SaldoActual, 0), ISNULL(@SaldoActual, 0), 
+        @UsuarioSistema, 
+        'FALLO: ' + LEFT(ERROR_MESSAGE(), 450), 0, @NumeroDocumento
+        )
+		END
         ;THROW;
     END CATCH
 END
