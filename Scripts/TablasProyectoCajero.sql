@@ -6,9 +6,9 @@ CREATE TABLE Cuentahabiente (
 	PrimerApellido VARCHAR(50) NOT NULL,
 	SegundoApellido VARCHAR(50) NULL,
     FechaNacimiento DATE NOT NULL,
-    --Direccion VARCHAR(500),
-    --Telefono VARCHAR(20),
-	--Email VARCHAR(100) NULL,
+    Direccion VARCHAR(500),
+    Telefono VARCHAR(20),
+	Email VARCHAR(100) NULL,
     FechaRegistro DATETIME DEFAULT GETDATE()
 	)
 
@@ -64,6 +64,7 @@ CREATE TABLE BitacoraTransacciones (
     FechaMovimiento DATETIME DEFAULT GETDATE(),
     FechaCheque DATE NULL,
 	NumeroCheque VARCHAR(20) NULL,
+    NumeroDocumento VARCHAR(50) NULL,
     Usuario NVARCHAR(100) NULL,
     Detalle NVARCHAR(500) NULL,
     Exito BIT DEFAULT 1 
