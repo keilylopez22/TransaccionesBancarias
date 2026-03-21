@@ -1,0 +1,287 @@
+@page "/transacciones-masivas"
+@rendermode InteractiveServer
+@using CajeroBlazor.Models
+@inject CajeroBlazor.Services.ApiService Api
+@inject IJSRuntime JS
+
+<PageTitle>Transacciones Masivas</PageTitle>
+
+<div class="container mt-4">
+    <h2>⚡ Transacciones Masivas</h2>
+    <p class="text-muted">Carga un archivo <code>.txt</code> con múltiples transacciones para ejecutarlas en paralelo.</p>
+
+    <div class="row g-4">
+        <div class="col-lg-5">
+            <div class="card shadow-sm">
+                <div class="card-header bg-dark text-white">📂 Cargar archivo</div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Seleccionar archivo .txt</label>
+                        <InputFile class="form-control" OnChange="SeleccionarArchivo" accept=".txt" />
+                        @if (archivoNombre != null)
+                        {
+                            <div class="mt-2 text-muted small">
+                                📄 <strong>@archivoNombre</strong> — @archivoTamano
+                            </div>
+                        }
+                    </div>
+
+                    <button class="btn btn-dark w-100" @onclick="Procesar"
+                            disabled="@(archivo == null || procesando)">
+                        @if (procesando)
+                        {
+                            <span class="spinner-border spinner-border-sm me-2"></span>
+                            <span>Procesando transacciones...</span>
+                        }
+                        else
+                        {
+                            <span>⚡ Ejecutar Transacciones</span>
+                        }
+                    </button>
+
+                    @if (error != null)
+                    {
+                        <div class="alert alert-danger mt-3">❌ @error</div>
+                    }
+                </div>
+            </div>
+
+            <div class="card shadow-sm mt-3">
+                <div class="card-header bg-secondary text-white">📋 Formato del archivo</div>
+                <div class="card-body p-0">
+                    <table class="table table-sm table-bordered mb-0 small">
+                        <thead class="table-dark">
+                            <tr><th>Tipo</th><th>Formato</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr><td><span class="badge bg-primary">1</span> Depósito</td><td><code>1|CUENTA|MONTO</code></td></tr>
+                            <tr><td><span class="badge bg-warning text-dark">2</span> Cheque</td><td><code>2|CUENTA|MONTO|NUM_CHQ|FECHA</code></td></tr>
+                            <tr><td><span class="badge bg-success">3</span> N. Crédito</td><td><code>3|CUENTA|MONTO|DETALLE</code></td></tr>
+                            <tr><td><span class="badge bg-danger">4</span> N. Débito</td><td><code>4|TARJETA|MONTO|PIN</code></td></tr>
+                        </tbody>
+                    </table>
+                    <div class="p-2 text-muted small">
+                        Las líneas que inician con <code>#</code> son comentarios y se ignoran.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-7">
+            @if (resultado != null)
+            {
+                <div class="row g-3 mb-4">
+                    <div class="col-6 col-md-3">
+                        <div class="card text-center border-dark shadow-sm">
+                            <div class="card-body py-3">
+                                <div class="fs-3 fw-bold">@resultado.TotalLineas</div>
+                                <div class="text-muted small">Total</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <div class="card text-center border-success shadow-sm">
+                            <div class="card-body py-3">
+                                <div class="fs-3 fw-bold text-success">@resultado.Exitosas</div>
+                                <div class="text-muted small">Exitosas</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <div class="card text-center border-danger shadow-sm">
+                            <div class="card-body py-3">
+                                <div class="fs-3 fw-bold text-danger">@resultado.Fallidas</div>
+                                <div class="text-muted small">Fallidas</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <div class="card text-center border-info shadow-sm">
+                            <div class="card-body py-3">
+                                <div class="fs-3 fw-bold text-info">@resultado.TiempoMs<small class="fs-6">ms</small></div>
+                                <div class="text-muted small">Tiempo</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                @if (resultado.TotalLineas > 0)
+                {
+                    <div class="mb-2">
+                        <div class="progress" style="height:20px">
+                            <div class="progress-bar bg-success" style="width:@(PorcentajeExito)%">
+                                @PorcentajeExito%
+                            </div>
+                            @if (resultado.Fallidas > 0)
+                            {
+                                <div class="progress-bar bg-danger" style="width:@(PorcentajeFallo)%">
+                                    @PorcentajeFallo%
+                                </div>
+                            }
+                        </div>
+                    </div>
+                }
+
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <div class="btn-group btn-group-sm">
+                        <button class="btn @(filtro == "todos" ? "btn-dark" : "btn-outline-dark")"
+                                @onclick='() => filtro = "todos"'>Todos (@resultado.TotalLineas)</button>
+                        <button class="btn @(filtro == "exitosos" ? "btn-success" : "btn-outline-success")"
+                                @onclick='() => filtro = "exitosos"'>✅ Exitosos (@resultado.Exitosas)</button>
+                        <button class="btn @(filtro == "fallidos" ? "btn-danger" : "btn-outline-danger")"
+                                @onclick='() => filtro = "fallidos"'>❌ Fallidos (@resultado.Fallidas)</button>
+                    </div>
+                    <button class="btn btn-sm btn-outline-secondary" @onclick="DescargarReporte">
+                        ⬇️ Exportar
+                    </button>
+                </div>
+
+                <div class="table-responsive" style="max-height:420px; overflow-y:auto">
+                    <table class="table table-sm table-hover align-middle mb-0">
+                        <thead class="table-dark sticky-top">
+                            <tr>
+                                <th>#</th>
+                                <th>Tipo</th>
+                                <th>Cuenta / Tarjeta</th>
+                                <th class="text-end">Monto</th>
+                                <th class="text-end">Nuevo Saldo</th>
+                                <th>Estado</th>
+                                <th>Mensaje</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var r in ResultadosFiltrados)
+                            {
+                                <tr class="@(!r.Exito ? "table-danger" : "")">
+                                    <td><small>@r.Linea</small></td>
+                                    <td><span class="badge @BadgeTipo(r.IdTipoTransaccion)">@NombreTipo(r.IdTipoTransaccion)</span></td>
+                                    <td><code class="small">@r.NumeroCuenta</code></td>
+                                    <td class="text-end">Q @r.Monto.ToString("N2")</td>
+                                    <td class="text-end">
+                                        @if (r.NuevoSaldo.HasValue)
+                                        {
+                                            <span class="text-success">Q @r.NuevoSaldo.Value.ToString("N2")</span>
+                                        }
+                                        else { <span class="text-muted">—</span> }
+                                    </td>
+                                    <td>
+                                        @if (r.Exito)
+                                        { <span class="badge bg-success">✅</span> }
+                                        else
+                                        { <span class="badge bg-danger">❌</span> }
+                                    </td>
+                                    <td>
+                                        <small class="@(!r.Exito ? "text-danger" : "text-muted")"
+                                               title="@r.Mensaje">
+                                            @(r.Mensaje.Length > 40 ? r.Mensaje[..40] + "…" : r.Mensaje)
+                                        </small>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+            else if (!procesando)
+            {
+                <div class="card border-dashed text-center py-5 text-muted shadow-sm">
+                    <div class="fs-1">📂</div>
+                    <p class="mt-2">Carga un archivo para ver los resultados aquí</p>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@code {
+    private IBrowserFile? archivo;
+    private string? archivoNombre;
+    private string? archivoTamano;
+    private bool procesando;
+    private string? error;
+    private string filtro = "todos";
+    private TransaccionMasivaResponse? resultado;
+
+    private int PorcentajeExito => resultado?.TotalLineas > 0
+        ? (int)Math.Round((double)resultado.Exitosas / resultado.TotalLineas * 100) : 0;
+    private int PorcentajeFallo => resultado?.TotalLineas > 0
+        ? (int)Math.Round((double)resultado!.Fallidas / resultado.TotalLineas * 100) : 0;
+
+    private IEnumerable<TransaccionMasivaResultado> ResultadosFiltrados => filtro switch
+    {
+        "exitosos" => resultado?.Resultados.Where(r => r.Exito) ?? [],
+        "fallidos" => resultado?.Resultados.Where(r => !r.Exito) ?? [],
+        _          => resultado?.Resultados ?? []
+    };
+
+    private void SeleccionarArchivo(InputFileChangeEventArgs e)
+    {
+        archivo      = e.File;
+        archivoNombre = e.File.Name;
+        archivoTamano = $"{e.File.Size / 1024.0:N1} KB";
+        resultado    = null;
+        error        = null;
+    }
+
+    private async Task Procesar()
+    {
+        if (archivo == null) return;
+        procesando = true;
+        error      = null;
+        resultado  = null;
+
+        try
+        {
+            using var stream = archivo.OpenReadStream(maxAllowedSize: 10 * 1024 * 1024);
+            var (data, err) = await Api.TransaccionMasivaAsync(stream, archivo.Name);
+            resultado = data;
+            error     = err;
+            filtro    = "todos";
+        }
+        catch (Exception ex)
+        {
+            error = ex.Message;
+        }
+        finally
+        {
+            procesando = false;
+        }
+    }
+
+    private async Task DescargarReporte()
+    {
+        if (resultado == null) return;
+
+        var sb = new System.Text.StringBuilder();
+        sb.AppendLine("Linea,Tipo,Cuenta/Tarjeta,Monto,NuevoSaldo,Estado,Mensaje");
+        foreach (var r in resultado.Resultados)
+        {
+            sb.AppendLine($"{r.Linea},{NombreTipo(r.IdTipoTransaccion)},{r.NumeroCuenta},{r.Monto:N2},{r.NuevoSaldo?.ToString("N2") ?? ""},{ (r.Exito ? "Exitosa" : "Fallida")},\"{r.Mensaje}\"");
+        }
+        sb.AppendLine();
+        sb.AppendLine($"Total:,{resultado.TotalLineas},,,,Exitosas:,{resultado.Exitosas},Fallidas:,{resultado.Fallidas},Tiempo:,{resultado.TiempoMs}ms");
+
+        var bytes = System.Text.Encoding.UTF8.GetBytes(sb.ToString());
+        var base64 = Convert.ToBase64String(bytes);
+        await JS.InvokeVoidAsync("eval",
+            $"const a=document.createElement('a');a.href='data:text/csv;base64,{base64}';a.download='reporte_masivo_{DateTime.Now:yyyyMMdd_HHmmss}.csv';a.click()");
+    }
+
+    private static string BadgeTipo(int tipo) => tipo switch
+    {
+        1 => "bg-primary",
+        2 => "bg-warning text-dark",
+        3 => "bg-success",
+        4 => "bg-danger",
+        _ => "bg-secondary"
+    };
+
+    private static string NombreTipo(int tipo) => tipo switch
+    {
+        1 => "Depósito",
+        2 => "Cheque",
+        3 => "N.Crédito",
+        4 => "N.Débito",
+        _ => "Desconocido"
+    };
+}

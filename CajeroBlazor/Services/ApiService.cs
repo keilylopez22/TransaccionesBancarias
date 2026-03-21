@@ -115,6 +115,19 @@ public class ApiService
         var err = await res.Content.ReadFromJsonAsync<ErrorResponse>();
         return (null, err?.Error ?? "Error desconocido");
     }
+
+    // Transacciones Masivas
+    public async Task<(TransaccionMasivaResponse? data, string? error)> TransaccionMasivaAsync(Stream archivo, string nombreArchivo)
+    {
+        using var content = new MultipartFormDataContent();
+        using var streamContent = new StreamContent(archivo);
+        streamContent.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("text/plain");
+        content.Add(streamContent, "archivo", nombreArchivo);
+        var res = await _http.PostAsync("api/transaccion/masiva", content);
+        if (res.IsSuccessStatusCode) return (await res.Content.ReadFromJsonAsync<TransaccionMasivaResponse>(), null);
+        var err = await res.Content.ReadFromJsonAsync<ErrorResponse>();
+        return (null, err?.Error ?? "Error al procesar el archivo");
+    }
 }
 
 public class ErrorResponse { public string Error { get; set; } = ""; }

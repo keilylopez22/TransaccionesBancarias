@@ -130,3 +130,23 @@ public class BitacoraTransaccion
     public string? Detalle { get; set; }
     public bool Exito { get; set; }
 }
+
+public class TransaccionMasivaResultado
+{
+    public int Linea { get; set; }
+    public int IdTipoTransaccion { get; set; }
+    public string? NumeroCuenta { get; set; }
+    public decimal Monto { get; set; }
+    public bool Exito { get; set; }
+    public string Mensaje { get; set; } = "";
+    public decimal? NuevoSaldo { get; set; }
+}
+
+public class TransaccionMasivaResponse
+{
+    public int TotalLineas { get; set; }
+    public int Exitosas { get; set; }
+    public int Fallidas { get; set; }
+    public long TiempoMs { get; set; }
+    public List<TransaccionMasivaResultado> Resultados { get; set; } = [];
+}
