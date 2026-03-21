@@ -25,6 +25,7 @@ public class BitacoraDAO
         FechaMovimiento    = r.GetDateTime(r.GetOrdinal("FechaMovimiento")),
         FechaCheque        = r.IsDBNull(r.GetOrdinal("FechaCheque"))  ? null : r.GetDateTime(r.GetOrdinal("FechaCheque")),
         NumeroCheque       = r.IsDBNull(r.GetOrdinal("NumeroCheque")) ? null : r.GetString(r.GetOrdinal("NumeroCheque")),
+        NumeroDocumento    = r.IsDBNull(r.GetOrdinal("NumeroDocumento")) ? null : r.GetString(r.GetOrdinal("NumeroDocumento")),
         Usuario            = r.IsDBNull(r.GetOrdinal("Usuario"))      ? null : r.GetString(r.GetOrdinal("Usuario")),
         Detalle            = r.IsDBNull(r.GetOrdinal("Detalle"))      ? null : r.GetString(r.GetOrdinal("Detalle")),
         Exito              = r.GetBoolean(r.GetOrdinal("Exito"))

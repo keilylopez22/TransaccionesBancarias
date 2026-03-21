@@ -92,6 +92,10 @@
                         <label class="form-label">Detalle</label>
                         <InputText class="form-control" @bind-Value="credito.Detalle" placeholder="Motivo del crédito" />
                     </div>
+                    <div class="mb-3">
+                         <label class="form-label">Número de Documento / Referencia</label>
+                        <InputText class="form-control" @bind-Value="credito.NumeroDocumento" placeholder="Ej: NC-12345" />
+                    </div>
                     <button type="submit" class="btn btn-success" disabled="@cargando">
                         @(cargando ? "Procesando..." : "Aplicar Crédito")
                     </button>

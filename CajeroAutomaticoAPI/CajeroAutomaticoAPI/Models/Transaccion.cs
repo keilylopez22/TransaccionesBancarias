@@ -23,6 +23,7 @@ public class NotaCreditoRequest
     public string NumeroCuenta { get; set; } = null!;
     public decimal Monto { get; set; }
     public string Detalle { get; set; } = null!;
+    public string NumeroDocumento { get; set; } = string.Empty;
 }
 
 public class NotaDebitoRequest
@@ -30,6 +31,7 @@ public class NotaDebitoRequest
     public string NumeroTarjeta { get; set; } = null!;
     public string PIN { get; set; } = null!;
     public decimal Monto { get; set; }
+    public string NumeroDocumento { get; set; } = string.Empty;
 }
 
 public class TransaccionResponse
@@ -38,6 +40,7 @@ public class TransaccionResponse
     public string? Cuenta { get; set; }
     public decimal? MontoAplicado { get; set; }
     public decimal? NuevoSaldo { get; set; }
+    public string? NumeroDocumento { get; set; }
 }
 
 public class TransaccionMasivaLinea
@@ -48,6 +51,7 @@ public class TransaccionMasivaLinea
     public string? NumeroTarjeta { get; set; }
     public decimal Monto { get; set; }
     public string? NumeroCheque { get; set; }
+    public string? NumeroDocumento { get; set; }
     public DateTime? FechaCheque { get; set; }
     public string? Detalle { get; set; }
     public string? PIN { get; set; }
@@ -62,6 +66,7 @@ public class TransaccionMasivaResultado
     public bool Exito { get; set; }
     public string Mensaje { get; set; } = null!;
     public decimal? NuevoSaldo { get; set; }
+    public string? NumeroDocumento { get; set; }
 }
 
 public class TransaccionMasivaResponse

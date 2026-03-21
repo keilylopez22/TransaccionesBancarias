@@ -73,6 +73,7 @@ public class NotaCreditoRequest
     public string NumeroCuenta { get; set; } = "";
     public decimal Monto { get; set; }
     public string Detalle { get; set; } = "";
+    public string NumeroDocumento { get; set; } = "";
 }
 
 public class NotaDebitoRequest
@@ -80,6 +81,7 @@ public class NotaDebitoRequest
     public string NumeroTarjeta { get; set; } = "";
     public string PIN { get; set; } = "";
     public decimal Monto { get; set; }
+    public string NumeroDocumento { get; set; } = "";
 }
 
 public class PagoChequeRequest
@@ -96,6 +98,7 @@ public class TransaccionResponse
     public string? Cuenta { get; set; }
     public decimal? MontoAplicado { get; set; }
     public decimal? NuevoSaldo { get; set; }
+    public string NumeroDocumento { get; set; } = "";
 }
 
 public class Tarjeta

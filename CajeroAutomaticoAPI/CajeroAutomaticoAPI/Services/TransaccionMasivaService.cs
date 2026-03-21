@@ -151,13 +151,15 @@ public class TransaccionMasivaService
                     {
                         NumeroCuenta = linea.NumeroCuenta!,
                         Monto        = linea.Monto,
-                        Detalle      = linea.Detalle ?? "Nota de crédito masiva"
+                        Detalle      = linea.Detalle ?? "Nota de crédito masiva",
+                        NumeroDocumento = linea.NumeroDocumento ?? Guid.NewGuid().ToString().Substring(0,8)
                     });
                     resultado.Exito      = true;
                     resultado.Mensaje    = credito.Mensaje;
                     resultado.NuevoSaldo = credito.NuevoSaldo;
+                    resultado.NumeroCuenta = linea.NumeroCuenta; 
+                    resultado.NumeroDocumento = credito.NumeroDocumento;
                     break;
-
                 case 4:
                     var debito = await _dao.NotaDebitoAsync(new NotaDebitoRequest
                     {
@@ -167,7 +169,7 @@ public class TransaccionMasivaService
                     });
                     resultado.Exito      = true;
                     resultado.Mensaje    = debito.Mensaje;
-                    resultado.NuevoSaldo = debito.NuevoSaldo;
+                    resultado.NuevoSaldo = debito.NuevoSaldo;  
                     break;
 
                 default:

@@ -38,6 +38,7 @@ public class TransaccionDAO
         cmd.Parameters.AddWithValue("@NumeroCuenta", req.NumeroCuenta);
         cmd.Parameters.AddWithValue("@Monto", req.Monto);
         cmd.Parameters.AddWithValue("@Detalle", req.Detalle);
+        cmd.Parameters.AddWithValue("@NumeroDocumento", req.NumeroDocumento);
         await conn.OpenAsync();
         using var reader = await cmd.ExecuteReaderAsync();
         await reader.ReadAsync();
@@ -45,7 +46,9 @@ public class TransaccionDAO
         {
             Mensaje = reader.GetString(reader.GetOrdinal("Mensaje")),
             MontoAplicado = reader.GetDecimal(reader.GetOrdinal("MontoAplicado")),
-            NuevoSaldo = reader.GetDecimal(reader.GetOrdinal("NuevoSaldo"))
+            NuevoSaldo = reader.GetDecimal(reader.GetOrdinal("NuevoSaldo")),
+            Cuenta = req.NumeroCuenta, 
+            NumeroDocumento = req.NumeroDocumento
         };
     }
 
@@ -56,6 +59,7 @@ public class TransaccionDAO
         cmd.Parameters.AddWithValue("@PIN", req.PIN);
         cmd.Parameters.AddWithValue("@NumeroTarjeta", req.NumeroTarjeta);
         cmd.Parameters.AddWithValue("@MontoIngresado", req.Monto);
+        cmd.Parameters.AddWithValue("@NumeroDocumento", req.NumeroDocumento);
         await conn.OpenAsync();
         using var reader = await cmd.ExecuteReaderAsync();
         await reader.ReadAsync();
