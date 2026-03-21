@@ -4,11 +4,11 @@ INSERT INTO TiposCuenta (Id, Descripcion) VALUES
 (3, 'Empresarial');
 
 INSERT INTO TiposTarjeta (Id, Descripcion) VALUES
-(1, 'Débito'),
-(2, 'Crédito');
+(1, 'Dï¿½bito'),
+(2, 'Crï¿½dito');
 
 INSERT INTO TipoTransaccion (Id, Descripcion) VALUES
-(1, 'Depósito'),
+(1, 'Depï¿½sito'),
 (2, 'Retiro'),
 (3, 'Transferencia'),
 (4, 'Pago de servicios');
@@ -16,10 +16,10 @@ INSERT INTO TipoTransaccion (Id, Descripcion) VALUES
 INSERT INTO Cuentahabiente 
 (CUI, PrimerNombre, SegundoNombre, PrimerApellido, SegundoApellido, FechaNacimiento, Direccion, Telefono, Email)
 VALUES
-('3012456780101', 'Juan', 'Carlos', 'Pérez', 'López', '1990-05-10', 'Zona 1, Ciudad', '55551234', 'juan@gmail.com'),
-('3012456780102', 'María', 'Elena', 'Gómez', 'Ramírez', '1985-08-22', 'Zona 10, Ciudad', '55552345', 'maria@gmail.com'),
-('3012456780103', 'Luis', NULL, 'Hernández', 'Castro', '1992-11-15', 'Mixco', '55553456', 'luis@gmail.com'),
-('3012456780104', 'Ana', 'Sofía', 'Morales', NULL, '2000-01-30', 'Villa Nueva', '55554567', 'ana@gmail.com');
+('3012456780101', 'Juan', 'Carlos', 'Pï¿½rez', 'Lï¿½pez', '1990-05-10', 'Zona 1, Ciudad', '55551234', 'juan@gmail.com'),
+('3012456780102', 'Marï¿½a', 'Elena', 'Gï¿½mez', 'Ramï¿½rez', '1985-08-22', 'Zona 10, Ciudad', '55552345', 'maria@gmail.com'),
+('3012456780103', 'Luis', NULL, 'Hernï¿½ndez', 'Castro', '1992-11-15', 'Mixco', '55553456', 'luis@gmail.com'),
+('3012456780104', 'Ana', 'Sofï¿½a', 'Morales', NULL, '2000-01-30', 'Villa Nueva', '55554567', 'ana@gmail.com');
 
 INSERT INTO Cuenta 
 (NumeroCuenta, Saldo, IdCuentahabiente, IdTipoCuenta)

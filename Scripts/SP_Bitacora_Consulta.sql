@@ -1,6 +1,4 @@
--- =============================================
--- SP_ObtenerBitacora
--- Consulta movimientos con filtros opcionales
+
 -- =============================================
 CREATE OR ALTER PROCEDURE SP_ObtenerBitacora
     @IdCuenta         INT      = NULL,
@@ -30,9 +28,8 @@ BEGIN
 END;
 GO
 
--- =============================================
--- SP_ObtenerBitacoraPorNumeroCuenta
--- Consulta movimientos usando el número de cuenta
+
+
 -- =============================================
 CREATE OR ALTER PROCEDURE SP_ObtenerBitacoraPorNumeroCuenta
     @NumeroCuenta VARCHAR(20),

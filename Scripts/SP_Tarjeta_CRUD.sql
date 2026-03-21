@@ -1,5 +1,4 @@
--- =============================================
--- SP_ObtenerTarjetas: Todas, por Id o por cuenta
+
 -- =============================================
 CREATE OR ALTER PROCEDURE SP_ObtenerTarjetas
     @Id       INT = NULL,
@@ -19,9 +18,8 @@ BEGIN
 END;
 GO
 
--- =============================================
--- SP_ActualizarTarjeta
--- Permite bloquear/desbloquear y resetear intentos
+
+
 -- =============================================
 CREATE OR ALTER PROCEDURE SP_ActualizarTarjeta
     @Id               INT,
@@ -49,11 +47,7 @@ BEGIN
 END;
 GO
 
--- =============================================
--- SP_DesbloquearTarjeta
--- Ver SP_DesbloquearTarjeta.sql para la version completa.
--- Desbloquea por @Id o @NumeroTarjeta, reinicia
--- IntentosFallidos y registra en bitácora.
+
 -- =============================================
 CREATE OR ALTER PROCEDURE SP_DesbloquearTarjeta
     @Id            INT           = NULL,
@@ -127,28 +121,5 @@ BEGIN
 END;
 GO
 
--- =============================================
--- SP_EliminarTarjeta
--- Elimina solo si no tiene movimientos en bitácora
--- =============================================
-CREATE OR ALTER PROCEDURE SP_EliminarTarjeta
-    @Id INT
-AS
-BEGIN
-    SET NOCOUNT ON;
-    BEGIN TRY
-        IF NOT EXISTS (SELECT 1 FROM Tarjeta WHERE Id = @Id)
-            RAISERROR('Tarjeta no encontrada.', 16, 1);
 
-        IF EXISTS (SELECT 1 FROM BitacoraTransacciones WHERE IdTarjeta = @Id)
-            RAISERROR('No se puede eliminar: la tarjeta tiene movimientos registrados.', 16, 1);
 
-        DELETE FROM Tarjeta WHERE Id = @Id;
-
-        SELECT 'Tarjeta eliminada exitosamente.' AS Mensaje;
-    END TRY
-    BEGIN CATCH
-        THROW;
-    END CATCH
-END;
-GO

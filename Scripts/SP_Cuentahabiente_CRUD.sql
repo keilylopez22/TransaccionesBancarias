@@ -1,5 +1,5 @@
 -- =============================================
--- SP_ObtenerCuentahabientes: Obtener todos o por Id
+-- SP_ObtenerCuentahabientes Obtener todos o por Id
 -- =============================================
 CREATE OR ALTER PROCEDURE SP_ObtenerCuentahabientes
     @Id INT = NULL
@@ -51,28 +51,3 @@ BEGIN
 END;
 GO
 
--- =============================================
--- SP_EliminarCuentahabiente
--- Elimina solo si no tiene cuentas asociadas
--- =============================================
-CREATE OR ALTER PROCEDURE SP_EliminarCuentahabiente
-    @Id INT
-AS
-BEGIN
-    SET NOCOUNT ON;
-    BEGIN TRY
-        IF NOT EXISTS (SELECT 1 FROM Cuentahabiente WHERE Id = @Id)
-            RAISERROR('Cuentahabiente no encontrado.', 16, 1);
-
-        IF EXISTS (SELECT 1 FROM Cuenta WHERE IdCuentahabiente = @Id)
-            RAISERROR('No se puede eliminar: el cuentahabiente tiene cuentas asociadas.', 16, 1);
-
-        DELETE FROM Cuentahabiente WHERE Id = @Id;
-
-        SELECT 'Cuentahabiente eliminado exitosamente.' AS Mensaje;
-    END TRY
-    BEGIN CATCH
-        THROW;
-    END CATCH
-END;
-GO
