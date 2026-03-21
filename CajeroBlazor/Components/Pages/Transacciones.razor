@@ -12,143 +12,157 @@
             <button class="nav-link @(tab == 1 ? "active" : "")" @onclick="() => CambiarTab(1)">💰 Depósito</button>
         </li>
         <li class="nav-item">
-            <button class="nav-link @(tab == 2 ? "active" : "")" @onclick="() => CambiarTab(2)">🧾 Pago de Cheque</button>
-        </li>
-        <li class="nav-item">
-            <button class="nav-link @(tab == 3 ? "active" : "")" @onclick="() => CambiarTab(3)">➕ Nota de Crédito</button>
-        </li>
-        <li class="nav-item">
-            <button class="nav-link @(tab == 4 ? "active" : "")" @onclick="() => CambiarTab(4)">🏧 Retiro (Nota Débito)</button>
-        </li>
-    </ul>
+            <button class="nav-link @(tab == 2 ? "active" : "")" @onclick="() => CambiarTab(2)">🧾 Pago de
+                Cheque</button>
+            </li>
+            <li class="nav-item">
+                <button class="nav-link @(tab == 3 ? "active" : "")" @onclick="() => CambiarTab(3)">➕ Nota de
+                    Crédito</button>
+                </li>
+                <li class="nav-item">
+                    <button class="nav-link @(tab == 4 ? "active" : "")" @onclick="() => CambiarTab(4)">🏧 Retiro (Nota
+                        Débito)</button>
+                    </li>
+                </ul>
 
-    @if (tab == 1)
-    {
-        <div class="card shadow-sm" style="max-width:450px">
-            <div class="card-header bg-primary text-white">Depósito en efectivo</div>
-            <div class="card-body">
-                <EditForm Model="deposito" OnValidSubmit="HacerDeposito">
-                    <div class="mb-3">
-                        <label class="form-label">Número de Cuenta</label>
-                        <InputText class="form-control" @bind-Value="deposito.NumeroCuenta" placeholder="Ej: 1000000001" />
+                @if (tab == 1)
+                {
+                    <div class="card shadow-sm" style="max-width:450px">
+                        <div class="card-header bg-primary text-white">Depósito en efectivo</div>
+                        <div class="card-body">
+                            <EditForm Model="deposito" OnValidSubmit="HacerDeposito">
+                                <div class="mb-3">
+                                    <label class="form-label">Número de Cuenta</label>
+                                    <InputText class="form-control" @bind-Value="deposito.NumeroCuenta" placeholder="Ej: 1000000001" />
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Monto (Q)</label>
+                                    <InputNumber class="form-control" @bind-Value="deposito.Monto" />
+                                </div>
+                                <button type="submit" class="btn btn-primary" disabled="@cargando">
+                                    @(cargando ? "Procesando..." : "Depositar")
+                                </button>
+                            </EditForm>
+                        </div>
                     </div>
-                    <div class="mb-3">
-                        <label class="form-label">Monto (Q)</label>
-                        <InputNumber class="form-control" @bind-Value="deposito.Monto" />
+                }
+
+                @if (tab == 2)
+                {
+                    <div class="card shadow-sm" style="max-width:450px">
+                        <div class="card-header bg-warning text-dark">Pago de Cheque</div>
+                        <div class="card-body">
+                            <EditForm Model="cheque" OnValidSubmit="HacerPagoCheque">
+                                <div class="mb-3">
+                                    <label class="form-label">Número de Cuenta</label>
+                                    <InputText class="form-control" @bind-Value="cheque.NumeroCuenta" placeholder="Ej: 1000000001" />
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Número de Cheque</label>
+                                    <InputText class="form-control" @bind-Value="cheque.NumeroCheque" placeholder="Ej: CHQ-000123" />
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Monto (Q)</label>
+                                    <InputNumber class="form-control" @bind-Value="cheque.Monto" />
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Fecha del Cheque</label>
+                                    <InputDate class="form-control" @bind-Value="cheque.FechaCheque" />
+                                </div>
+                                <button type="submit" class="btn btn-warning" disabled="@cargando">
+                                    @(cargando ? "Procesando..." : "Pagar Cheque")
+                                </button>
+                            </EditForm>
+                        </div>
                     </div>
-                    <button type="submit" class="btn btn-primary" disabled="@cargando">
-                        @(cargando ? "Procesando..." : "Depositar")
-                    </button>
-                </EditForm>
+                }
+
+                @if (tab == 3)
+                {
+                    <div class="card shadow-sm" style="max-width:450px">
+                        <div class="card-header bg-success text-white">Nota de Crédito</div>
+                        <div class="card-body">
+                            <EditForm Model="credito" OnValidSubmit="HacerCredito">
+                                <div class="mb-3">
+                                    <label class="form-label">Número de Cuenta</label>
+                                    <InputText class="form-control" @bind-Value="credito.NumeroCuenta" />
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Monto (Q)</label>
+                                    <InputNumber class="form-control" @bind-Value="credito.Monto" />
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Detalle</label>
+                                    <InputText class="form-control" @bind-Value="credito.Detalle" placeholder="Motivo del crédito" />
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Número de Documento / Referencia</label>
+                                    <InputText class="form-control" @bind-Value="credito.NumeroDocumento" placeholder="Ej: NC-12345" />
+                                </div>
+                                <button type="submit" class="btn btn-success" disabled="@cargando">
+                                    @(cargando ? "Procesando..." : "Aplicar Crédito")
+                                </button>
+                            </EditForm>
+                        </div>
+                    </div>
+                }
+
+                @if (tab == 4)
+                {
+                    <div class="card shadow-sm" style="max-width:450px">
+                        <div class="card-header bg-warning text-dark fw-bold">Nota de Débito</div>
+                        <div class="card-body">
+                            <EditForm Model="debito" OnValidSubmit="HacerDebito">
+                                <div class="mb-3">
+                                    <label class="form-label">Número de Tarjeta</label>
+                                    <InputText class="form-control" @bind-Value="debito.NumeroTarjeta"
+                                               placeholder="Ej: BCRD2403MO0025..." />
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label">Monto (Q)</label>
+                                    <InputNumber class="form-control" @bind-Value="debito.Monto" />
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label">Detalle</label>
+                                    <InputText class="form-control" @bind-Value="debito.Detalle" placeholder="Ej: Cobro por servicio" />
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label">Número de Documento</label>
+                                    <InputText class="form-control" @bind-Value="debito.NumeroDocumento" placeholder="Ej: ND-001" />
+                                    <div class="form-text">Si se deja vacío, se generará uno automáticamente.</div>
+                                </div>
+
+                                <button type="submit" class="btn btn-warning w-100" disabled="@cargando">
+                                    @(cargando ? "Procesando..." : "Aplicar Nota de Débito")
+                                </button>
+                            </EditForm>
+                        </div>
+                    </div>
+                }
+
+                @if (resultado != null)
+                {
+                    <div class="alert alert-success mt-4" style="max-width:450px">
+                        <strong>✅ @resultado.Mensaje</strong>
+                        @if (resultado.NuevoSaldo.HasValue)
+                        {
+                            <div>Nuevo saldo: <strong>Q @resultado.NuevoSaldo.Value.ToString("N2")</strong></div>
+                        }
+                        @if (resultado.MontoAplicado.HasValue)
+                        {
+                            <div>Monto: Q @resultado.MontoAplicado.Value.ToString("N2")</div>
+                            <div>No. Documento: <strong>@resultado.NumeroDocumento</strong></div>
+                        }
+                    </div>
+                }
+                @if (errorMsg != null)
+                {
+                    <div class="alert alert-danger mt-4" style="max-width:450px">❌ @errorMsg</div>
+                }
             </div>
-        </div>
-    }
-
-    @if (tab == 2)
-    {
-        <div class="card shadow-sm" style="max-width:450px">
-            <div class="card-header bg-warning text-dark">Pago de Cheque</div>
-            <div class="card-body">
-                <EditForm Model="cheque" OnValidSubmit="HacerPagoCheque">
-                    <div class="mb-3">
-                        <label class="form-label">Número de Cuenta</label>
-                        <InputText class="form-control" @bind-Value="cheque.NumeroCuenta" placeholder="Ej: 1000000001" />
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Número de Cheque</label>
-                        <InputText class="form-control" @bind-Value="cheque.NumeroCheque" placeholder="Ej: CHQ-000123" />
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Monto (Q)</label>
-                        <InputNumber class="form-control" @bind-Value="cheque.Monto" />
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Fecha del Cheque</label>
-                        <InputDate class="form-control" @bind-Value="cheque.FechaCheque" />
-                    </div>
-                    <button type="submit" class="btn btn-warning" disabled="@cargando">
-                        @(cargando ? "Procesando..." : "Pagar Cheque")
-                    </button>
-                </EditForm>
-            </div>
-        </div>
-    }
-
-    @if (tab == 3)
-    {
-        <div class="card shadow-sm" style="max-width:450px">
-            <div class="card-header bg-success text-white">Nota de Crédito</div>
-            <div class="card-body">
-                <EditForm Model="credito" OnValidSubmit="HacerCredito">
-                    <div class="mb-3">
-                        <label class="form-label">Número de Cuenta</label>
-                        <InputText class="form-control" @bind-Value="credito.NumeroCuenta" />
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Monto (Q)</label>
-                        <InputNumber class="form-control" @bind-Value="credito.Monto" />
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Detalle</label>
-                        <InputText class="form-control" @bind-Value="credito.Detalle" placeholder="Motivo del crédito" />
-                    </div>
-                    <div class="mb-3">
-                         <label class="form-label">Número de Documento / Referencia</label>
-                        <InputText class="form-control" @bind-Value="credito.NumeroDocumento" placeholder="Ej: NC-12345" />
-                    </div>
-                    <button type="submit" class="btn btn-success" disabled="@cargando">
-                        @(cargando ? "Procesando..." : "Aplicar Crédito")
-                    </button>
-                </EditForm>
-            </div>
-        </div>
-    }
-
-    @if (tab == 4)
-    {
-        <div class="card shadow-sm" style="max-width:450px">
-            <div class="card-header bg-danger text-white">Retiro con Tarjeta</div>
-            <div class="card-body">
-                <EditForm Model="debito" OnValidSubmit="HacerDebito">
-                    <div class="mb-3">
-                        <label class="form-label">Número de Tarjeta</label>
-                        <InputText class="form-control" @bind-Value="debito.NumeroTarjeta" placeholder="Ej: BCRD2403MO0025123479" />
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">PIN</label>
-                        <InputText class="form-control" type="password" @bind-Value="debito.PIN" maxlength="4" />
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Monto a retirar (Q)</label>
-                        <InputNumber class="form-control" @bind-Value="debito.Monto" />
-                    </div>
-                    <button type="submit" class="btn btn-danger" disabled="@cargando">
-                        @(cargando ? "Procesando..." : "Retirar")
-                    </button>
-                </EditForm>
-            </div>
-        </div>
-    }
-
-    @if (resultado != null)
-    {
-        <div class="alert alert-success mt-4" style="max-width:450px">
-            <strong>✅ @resultado.Mensaje</strong>
-            @if (resultado.NuevoSaldo.HasValue)
-            {
-                <div>Nuevo saldo: <strong>Q @resultado.NuevoSaldo.Value.ToString("N2")</strong></div>
-            }
-            @if (resultado.MontoAplicado.HasValue)
-            {
-                <div>Monto: Q @resultado.MontoAplicado.Value.ToString("N2")</div>
-            }
-        </div>
-    }
-    @if (errorMsg != null)
-    {
-        <div class="alert alert-danger mt-4" style="max-width:450px">❌ @errorMsg</div>
-    }
-</div>
 
 @code {
     private int tab = 1;

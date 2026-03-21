@@ -28,9 +28,9 @@ public class NotaCreditoRequest
 
 public class NotaDebitoRequest
 {
-    public string NumeroTarjeta { get; set; } = null!;
-    public string PIN { get; set; } = null!;
+    public string? NumeroTarjeta { get; set; }
     public decimal Monto { get; set; }
+    public string? Detalle { get; set; } 
     public string NumeroDocumento { get; set; } = string.Empty;
 }
 
@@ -41,6 +41,7 @@ public class TransaccionResponse
     public decimal? MontoAplicado { get; set; }
     public decimal? NuevoSaldo { get; set; }
     public string? NumeroDocumento { get; set; }
+    public bool Exito { get; set; }
 }
 
 public class TransaccionMasivaLinea

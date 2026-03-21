@@ -79,9 +79,9 @@ public class NotaCreditoRequest
 public class NotaDebitoRequest
 {
     public string NumeroTarjeta { get; set; } = "";
-    public string PIN { get; set; } = "";
     public decimal Monto { get; set; }
-    public string NumeroDocumento { get; set; } = "";
+    public string? Detalle { get; set; }
+    public string? NumeroDocumento { get; set; } = "";
 }
 
 public class PagoChequeRequest

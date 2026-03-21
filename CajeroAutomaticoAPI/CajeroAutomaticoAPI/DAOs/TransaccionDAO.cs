@@ -1,5 +1,6 @@
 using CajeroAutomaticoAPI.Models;
 using Microsoft.Data.SqlClient;
+using System.Data;
 
 namespace CajeroAutomaticoAPI.DAOs;
 
@@ -47,28 +48,56 @@ public class TransaccionDAO
             Mensaje = reader.GetString(reader.GetOrdinal("Mensaje")),
             MontoAplicado = reader.GetDecimal(reader.GetOrdinal("MontoAplicado")),
             NuevoSaldo = reader.GetDecimal(reader.GetOrdinal("NuevoSaldo")),
-            Cuenta = req.NumeroCuenta, 
+            Cuenta = req.NumeroCuenta,
             NumeroDocumento = req.NumeroDocumento
         };
     }
 
     public async Task<TransaccionResponse> NotaDebitoAsync(NotaDebitoRequest req)
     {
-        using var conn = new SqlConnection(_connectionString);
-        using var cmd = new SqlCommand("SP_NotaDebito", conn) { CommandType = System.Data.CommandType.StoredProcedure };
-        cmd.Parameters.AddWithValue("@PIN", req.PIN);
+        using var conn = new SqlConnection(_connectionString); 
+        using var cmd = new SqlCommand("SP_NotaDebito", conn);
+        cmd.CommandType = CommandType.StoredProcedure;
+
         cmd.Parameters.AddWithValue("@NumeroTarjeta", req.NumeroTarjeta);
-        cmd.Parameters.AddWithValue("@MontoIngresado", req.Monto);
+        cmd.Parameters.AddWithValue("@Monto", req.Monto);
+        cmd.Parameters.AddWithValue("@Detalle", req.Detalle ?? "Nota de Débito");
         cmd.Parameters.AddWithValue("@NumeroDocumento", req.NumeroDocumento);
+
         await conn.OpenAsync();
         using var reader = await cmd.ExecuteReaderAsync();
-        await reader.ReadAsync();
-        return new TransaccionResponse
+
+        var response = new TransaccionResponse();
+
+        if (await reader.ReadAsync())
         {
-            Mensaje = reader.GetString(reader.GetOrdinal("Mensaje")),
-            NuevoSaldo = reader.GetDecimal(reader.GetOrdinal("SaldoRestante"))
-        };
+            response.Mensaje = reader.GetString(reader.GetOrdinal("Mensaje"));
+            response.NumeroDocumento = reader.GetString(reader.GetOrdinal("Documento"));
+            response.NuevoSaldo = reader.GetDecimal(reader.GetOrdinal("SaldoFinal"));
+            response.MontoAplicado = req.Monto; 
+            response.Cuenta = req.NumeroTarjeta; 
+            response.Exito = true;
+        }
+        return response;
     }
+    /*
+        public async Task<TransaccionResponse> NotaDebitoAsync(NotaDebitoRequest req)
+        {
+            using var conn = new SqlConnection(_connectionString);
+            using var cmd = new SqlCommand("SP_NotaDebito", conn) { CommandType = System.Data.CommandType.StoredProcedure };
+            cmd.Parameters.AddWithValue("@PIN", req.PIN);
+            cmd.Parameters.AddWithValue("@NumeroTarjeta", req.NumeroTarjeta);
+            cmd.Parameters.AddWithValue("@MontoIngresado", req.Monto);
+            cmd.Parameters.AddWithValue("@NumeroDocumento", req.NumeroDocumento);
+            await conn.OpenAsync();
+            using var reader = await cmd.ExecuteReaderAsync();
+            await reader.ReadAsync();
+            return new TransaccionResponse
+            {
+                Mensaje = reader.GetString(reader.GetOrdinal("Mensaje")),
+                NuevoSaldo = reader.GetDecimal(reader.GetOrdinal("SaldoRestante"))
+            };
+        } */
 
     public async Task<TransaccionResponse> CajeroMaestroAsync(TransaccionRequest req)
     {

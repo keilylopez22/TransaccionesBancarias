@@ -96,9 +96,10 @@ public class TransaccionMasivaService
                     item.Detalle      = partes.Length > 3 ? partes[3].Trim() : "Nota de crédito masiva";
                     break;
 
-                case 4: // Nota Débito: TIPO|TARJETA|MONTO|PIN
+                case 4: // Parseo correcto para Nota Débito
                     item.NumeroTarjeta = partes[1].Trim();
-                    item.PIN           = partes.Length > 3 ? partes[3].Trim() : null;
+                    item.Detalle = partes.Length > 3 ? partes[3].Trim() : "Nota Débito Masiva";
+                    item.NumeroDocumento = partes.Length > 4 ? partes[4].Trim() : null;
                     break;
             }
 
@@ -160,7 +161,27 @@ public class TransaccionMasivaService
                     resultado.NumeroCuenta = linea.NumeroCuenta; 
                     resultado.NumeroDocumento = credito.NumeroDocumento;
                     break;
-                case 4:
+                case 4: // Ejecución corregida usando 'linea'
+                    var debito = await _dao.NotaDebitoAsync(new NotaDebitoRequest
+                    {
+                        NumeroTarjeta = linea.NumeroTarjeta!,
+                        Monto = linea.Monto,
+                        Detalle = linea.Detalle,
+                        NumeroDocumento = linea.NumeroDocumento ?? $"ND-{linea.Linea}-{DateTime.Now.Ticks.ToString().Substring(10)}"
+                    });
+                    resultado.Exito = true;
+                    resultado.Mensaje = debito.Mensaje;
+                    resultado.NuevoSaldo = debito.NuevoSaldo;
+                    resultado.NumeroDocumento = debito.NumeroDocumento;
+                    break;
+                default:
+                    resultado.Exito = false;
+                    resultado.Mensaje = "Tipo no soportado";
+                    break;
+
+
+/*
+                case 5:
                     var debito = await _dao.NotaDebitoAsync(new NotaDebitoRequest
                     {
                         NumeroTarjeta = linea.NumeroTarjeta!,
@@ -175,7 +196,7 @@ public class TransaccionMasivaService
                 default:
                     resultado.Exito   = false;
                     resultado.Mensaje = $"Tipo de transacción {linea.IdTipoTransaccion} no reconocido.";
-                    break;
+                    break;*/
             }
         }
         catch (Exception ex)
