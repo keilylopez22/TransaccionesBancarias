@@ -1,0 +1,85 @@
+CREATE OR ALTER PROCEDURE SP_PagoCheque
+@NumeroCuenta VARCHAR(20),
+@Monto DECIMAL(18,2),
+@FechaCheque DATE, 
+@NumeroCheque VARCHAR(20),
+@Usuario VARCHAR(100)
+AS
+BEGIN 
+	SET NOCOUNT ON;
+    SET TRANSACTION ISOLATION LEVEL READ COMMITTED
+
+	DECLARE @IdCuenta INT
+	DECLARE @SaldoActual DECIMAL(18,2)
+	DECLARE @IdTipoCuenta INT 
+	DECLARE @FechaActual DATE = CAST (GETDATE() AS DATE);
+
+	BEGIN TRY
+	BEGIN TRANSACTION
+
+	SELECT @IdCuenta = Id, @SaldoActual = Saldo, @IdTipoCuenta = IdTipoCuenta 
+	FROM Cuenta WITH (UPDLOCK,ROWLOCK, HOLDLOCK)
+	WHERE NumeroCuenta = @NumeroCuenta AND Estado = 1
+
+	IF @IdCuenta IS NULL
+		BEGIN
+			RAISERROR('La cuenta no existe o está inactiva.', 16, 1);
+		END
+
+	IF @IdTipoCuenta <> 2
+		BEGIN
+			RAISERROR('Solo se pueden pagar cheques de cuentas monetarias.', 16, 1);
+		END
+
+	IF @FechaCheque < DATEADD(MONTH, -6, @FechaActual)
+	BEGIN
+		RAISERROR('El cheque ya ha expirado', 16,1)
+	END
+
+	IF @Monto <= 0
+	BEGIN
+		RAISERROR('Monto del cheque invalido', 16,1)
+	END
+
+	IF @FechaCheque > @FechaActual
+	BEGIN
+	    RAISERROR ('La fecha del chaque no puede ser futura',16,1)
+	END
+
+	 IF EXISTS ( SELECT 1 FROM BitacoraTransacciones WITH (UPDLOCK, ROWLOCK ,HOLDLOCK)
+	 WHERE NumeroCheque = @NumeroCheque AND Exito = 1)
+	 BEGIN
+		RAISERROR ('Este cheque ya fue usado anteriormente.', 16,1)
+	END
+
+	IF @SaldoActual < @Monto
+	BEGIN 
+		RAISERROR('Fondos insuficientes', 16, 1);
+	END
+
+	UPDATE Cuenta SET Saldo = Saldo - @Monto WHERE Id = @IdCuenta
+
+	INSERT INTO BitacoraTransacciones (IdCuenta, IdTipoTransaccion, Monto, SaldoAnterior, SaldoNuevo, 
+	Usuario, Detalle, FechaCheque, NumeroCheque, Exito)
+	VALUES (@IdCuenta, 2, @Monto, @SaldoActual, (@SaldoActual - @Monto), 
+	@Usuario, 'Pago de cheque No. ' + @NumeroCheque, @FechaCheque, @NumeroCheque, 1)
+
+	COMMIT TRANSACTION;
+	SELECT 'Cheque pagado con éxito' AS Mensaje, (@SaldoActual - @Monto) AS NuevoSaldo;
+
+END TRY
+BEGIN CATCH
+	IF @IdCuenta IS NOT NULL AND @IdCuenta > 0
+        BEGIN
+            INSERT INTO BitacoraTransacciones (
+                IdCuenta, IdTipoTransaccion, Monto, SaldoAnterior, SaldoNuevo, 
+                Detalle, Exito, Usuario, FechaMovimiento
+            )
+            VALUES (
+                @IdCuenta, 2, @Monto, ISNULL(@SaldoActual, 0), ISNULL(@SaldoActual, 0), 
+                ERROR_MESSAGE(), 0, @Usuario, GETDATE()
+            );
+			END
+			;THROW;
+    END CATCH
+END
