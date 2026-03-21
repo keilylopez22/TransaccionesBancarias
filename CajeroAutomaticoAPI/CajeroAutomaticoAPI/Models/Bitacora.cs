@@ -14,7 +14,6 @@ public class BitacoraTransaccion
     public DateTime FechaMovimiento { get; set; }
     public DateTime? FechaCheque { get; set; }
     public string? NumeroCheque { get; set; }
-    public string? NumeroDocumento { get; set; }
     public string? Usuario { get; set; }
     public string? Detalle { get; set; }
     public bool Exito { get; set; }
